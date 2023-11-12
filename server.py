@@ -36,7 +36,6 @@ def process_doc():
     """
 
     file = req.files['file']
-
     input_lang_choice, output_lang_choice = '英语', '韩语'
 
     if file.filename == '':
@@ -52,7 +51,6 @@ def process_doc():
         return jsonify({'error': 'Error processing file'}), 400
 
     complex_medical_terms, err = speech_to_text(wav_file)
-
     if err != None:
         return jsonify({
             'error': err
@@ -107,4 +105,4 @@ def process_patient():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5050)
+    app.run(host='0.0.0.0', port=5050, debug=True)

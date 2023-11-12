@@ -9,11 +9,6 @@ client = OpenAI(
 )
 
 def decomplicate(complex_medical_terms):
-    med_processor_endpoint = os.environ.get('MED_PROCESSOR_ENDPOINT')
-    if med_processor_endpoint == None:
-        return (None, 'Unable to reach medical processing server')
-    
-    med_processor_endpoint_path = med_processor_endpoint + '/med-processor'
     payload = "Simplify this medical sentence and explain difficult medical jargons in parenthesis with format \"simplified: `sentence`\" and nothing else as your response: " + complex_medical_terms
 
     # Use GPT 4 to simplify medical terms
