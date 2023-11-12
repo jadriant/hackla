@@ -1,21 +1,28 @@
 import os
 import requests
+from dotenv import load_dotenv
 
-def translate(simple_medical_terms):
+load_dotenv()
+
+def translate(simple_medical_terms, input_lang_choice, output_lang_choice):
     translator_endpoint = os.environ.get('TRANSLATOR_ENDPOINT')
     if translator_endpoint == None:
         return (None, 'Unable to reach translator server')
     
-    translator_endpoint_path = translator_endpoint + '/translator'
+    translator_endpoint_path = translator_endpoint + '/run/predict'
     payload = {
-        'input_lang': simple_medical_terms
+        'data': [
+            input_lang_choice,
+            output_lang_choice,
+            simple_medical_terms,
+        ]
     }
 
-    res = requests.get(translator_endpoint_path, json=payload)
+    res = requests.post(translator_endpoint_path, json=payload)
     if res.status_code != 200:
         return (None, 'Unable to translate medical terms')
     
-    output_lang = res.json().get('output_lang', '')
+    output_lang = res.json().get('data', '')
     if output_lang == '':
         return (None, 'Unable to retrieve translation from server')
     

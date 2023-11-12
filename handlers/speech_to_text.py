@@ -20,5 +20,3 @@ def speech_to_text(input_speech):
         return (None, 'Unable to retrieve medical terms from server')
     
     return (complex_medical_terms, None)
-
-print(speech_to_text('./test/test.wav'))
