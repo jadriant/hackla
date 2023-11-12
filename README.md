@@ -8,7 +8,7 @@ This is the main server that communicates between the frontend web client and 4 
 
 ## 💻 Usage
 
-To run this server simply call
+To run this server, fill in `.env.copy` and rename it to `.env`, then simply call
 
 ```
 python server.py
