@@ -56,15 +56,7 @@ def process_doc():
             'error': err
         })
     
-    translated_med_simple, err = text_to_speech(output_lang)
-    if err != None:
-        return jsonify({
-            'error': err
-        })
-    
-    return jsonify({
-        'translated_med_simple': translated_med_simple
-    })
+    return text_to_speech(output_lang)
 
 @app.route('/patient-speaks', methods=['POST'])
 def process_patient():
@@ -95,15 +87,7 @@ def process_patient():
             'error': err
         })
     
-    en_question, err = text_to_speech(en_lang)
-    if err != None:
-        return jsonify({
-            'error': err
-        })
-    
-    return jsonify({
-        'en_question': en_question
-    })
+    return text_to_speech(en_lang)
 
 
 if __name__ == '__main__':
