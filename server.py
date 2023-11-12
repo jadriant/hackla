@@ -13,10 +13,6 @@ from handlers.text_to_speech import text_to_speech
 app = Flask(__name__)
 load_dotenv()
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    return 'Hello World!'
-
 @app.route('/doctor-speaks', methods=['POST'])
 def process_doc():
     """
@@ -25,16 +21,22 @@ def process_doc():
     """
     
     input_audio = req.json.get('input_audio', '')
+
     if input_audio == '':
         return jsonify({
             'error': 'Unable to obtain input audio'
         }), 404
-    
+    else:
+        print("received input audio")
+
     complex_medical_terms, err = speech_to_text(input_audio)
+
     if err != None:
         return jsonify({
             'error': err
         })
+
+    print(complex_medical_terms)
 
     simple_medical_terms, err = decomplicate(complex_medical_terms)
     if err != None:
@@ -95,4 +97,4 @@ def process_patient():
 
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=5050, debug=True)
+    app.run(host='localhost', port=5000, debug=True)
