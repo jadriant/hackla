@@ -4,6 +4,7 @@ from flask import (
     jsonify
 )
 from dotenv import load_dotenv
+import wave
 
 from handlers.speech_to_text import speech_to_text
 from handlers.med_processor import decomplicate
@@ -22,7 +23,6 @@ def process_doc():
 
     file = request.files['file']
 
-
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
     else:
@@ -30,21 +30,12 @@ def process_doc():
         print(file.filename)
 
     if file and allowed_file(file.filename):
-        try:
-            # Process the .wav file
-            with wave.open(file, 'rb') as wav_file:
-                # Extract Raw Audio from Wav File
-                signal = wav_file.readframes(-1)
-                signal = np.frombuffer(signal, dtype='int16')
-                fs = wav_file.getframerate()
-                if wav_file.getnchannels() == 2:
-                    print('Just mono files')
-                    sys.exit(0)
-    except:
+        input_speech = wave.open(file, 'rb')
+    else:
         print("Error")
         return jsonify({'error': 'Error processing file'}), 400
 
-    complex_medical_terms, err = speech_to_text(file)
+    complex_medical_terms, err = speech_to_text(input_speech)
 
     if err != None:
         return jsonify({
@@ -84,29 +75,13 @@ def process_patient():
     
     file = request.files['file']
 
-
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-    else:
-        print("received file")
-        print(file.filename)
-
     if file and allowed_file(file.filename):
-        try:
-            # Process the .wav file
-            with wave.open(file, 'rb') as wav_file:
-                # Extract Raw Audio from Wav File
-                signal = wav_file.readframes(-1)
-                signal = np.frombuffer(signal, dtype='int16')
-                fs = wav_file.getframerate()
-                if wav_file.getnchannels() == 2:
-                    print('Just mono files')
-                    sys.exit(0)
-    except:
+        input_speech = wave.open(file, 'rb')
+    else:
         print("Error")
         return jsonify({'error': 'Error processing file'}), 400
 
-    complex_medical_terms, err = speech_to_text(file)
+    complex_medical_terms, err = speech_to_text(input_speech)
     
     simple_question, err = speech_to_text(input_audio)
     if err != None:
