@@ -11,6 +11,14 @@ from handlers.med_processor import decomplicate
 from handlers.translator import translate
 from handlers.text_to_speech import text_to_speech
 
+from pydub import AudioSegment
+
+def convert_webm_to_wav(webm_file):
+    audio = AudioSegment.from_file(webm_file, format="webm")
+    wav_file = webm_file.split('.')[0] + '.wav'
+    audio.export(wav_file, format="wav")
+    return wav_file
+
 app = Flask(__name__)
 load_dotenv()
 
@@ -30,7 +38,8 @@ def process_doc():
         print(file.filename)
 
     if file and allowed_file(file.filename):
-        input_speech = wave.open(file, 'rb')
+        wav_file = convert_webm_to_wav(file)
+        input_speech = wave.open(wav_file, 'rb')
     else:
         print("Error")
         return jsonify({'error': 'Error processing file'}), 400
@@ -68,7 +77,8 @@ def process_patient():
     file = request.files['file']
 
     if file and allowed_file(file.filename):
-        input_speech = wave.open(file, 'rb')
+        wav_file = convert_webm_to_wav(file)
+        input_speech = wave.open(wav_file, 'rb')
     else:
         print("Error")
         return jsonify({'error': 'Error processing file'}), 400

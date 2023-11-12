@@ -68,7 +68,9 @@ function ToggleButton({ label, isRotated }) {
             });
 
             if (response.ok) {
-                console.log('Audio sent successfully');
+                const responseBlob = await response.blob();
+                playReceivedAudio(responseBlob);    
+                console.log('Audio received successfully');
             } else {
                 console.error('Server error:', response);
             }
@@ -82,12 +84,16 @@ function ToggleButton({ label, isRotated }) {
         playAudio() // Play the audio after sending
     };
 
+    const playReceivedAudio = (audioBlob) => {
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        audio.play();
+        console.log('Playing the received audio...');
+    };
+
 
     async function convertWebmToWav(audioBlob) {
     }
-
-
-
 
     const playAudio = () => {
         if (audioBlob) {
