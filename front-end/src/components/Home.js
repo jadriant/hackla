@@ -13,11 +13,10 @@ import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 
 
-function ToggleButton({ label, isRotated }) {
+function ToggleButton({ label, isRotated, isPatient }) {
     const [isActive, setIsActive] = useState(false);
     const [audioBlob, setAudioBlob] = useState(null);
     const mediaRecorderRef = useRef(null);
-
     const [isReadyToSend, setIsReadyToSend] = useState(false);
 
     // Function to toggle recording on and off
@@ -48,26 +47,38 @@ function ToggleButton({ label, isRotated }) {
         }
     };
 
-    
-
     const sendAudioToServer = async () => {
         if (audioBlob && isReadyToSend) {
             try {
                 const formData = new FormData();
                 formData.append("file", audioBlob, "recording.webm");
-
-                const response = await fetch('/doctor-speaks', {
-                    method: 'POST',
-                    body: formData,
-                });
-
-            if (response.ok) {
-                const responseBlob = await response.blob();
-                playReceivedAudio(responseBlob);    
-                console.log('Audio received successfully');
-            } else {
-                console.error('Server error:', response);
-            }
+                
+                if (isPatient) {
+                    const response = await fetch('/patient-speaks', {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    if (response.ok) {
+                        const responseBlob = await response.blob();
+                        playReceivedAudio(responseBlob);    
+                        console.log('Audio received successfully');
+                    } else {
+                        console.error('Server error:', response);
+                    }
+                }
+                else {
+                    const response = await fetch('/doctor-speaks', {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    if (response.ok) {
+                        const responseBlob = await response.blob();
+                        playReceivedAudio(responseBlob);    
+                        console.log('Audio received successfully');
+                    } else {
+                        console.error('Server error:', response);
+                    }
+                }
         } catch (error) {
             console.error('Error in conversion or sending:', error);
         }
@@ -125,8 +136,8 @@ export default function App({ user, language }) {
 
     return (
         <div className="flex flex-col items-center justify-center bg-cover bg-center h-screen space-y-60" style={{ backgroundImage: "url('https://cdn.builder.io/api/v1/image/assets/TEMP/7966c460-a2cd-49b6-8e55-8965ae56e831?apiKey=be43af7b4ce2472eaff8e8a17c078188&')" }}>
-            <ToggleButton label="Patient" isRotated={true} />
-            <ToggleButton label="Doctor" />
+            <ToggleButton label="Patient" isRotated={true} isPatient={true}/>
+            <ToggleButton label="Doctor" isPatient={false}/>
             {/* <Link id="signout" className="FormButton" to="/"
                 onClick={() => auth.signOut()}>{language}
             </Link> */}

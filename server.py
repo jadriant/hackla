@@ -55,8 +55,6 @@ def process_doc():
             'error': err
         })
 
-    print(complex_medical_terms)
-
     simple_medical_terms, err = decomplicate(complex_medical_terms)
     if err != None:
         return jsonify({
@@ -68,6 +66,8 @@ def process_doc():
         return jsonify({
             'error': err
         })
+
+    print(output_lang)
     
     return text_to_speech(output_lang)
 
@@ -80,7 +80,7 @@ def process_patient():
     
     file = req.files['file']
 
-    input_lang_choice, output_lang_choice = '韩文', '韩语'
+    input_lang_choice, output_lang_choice = '韩语', '英语'
 
     if file:
         wav_file = convert_webm_to_wav(file)
