@@ -1,8 +1,8 @@
 import os
-import requests
-
-import os
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 client = OpenAI(
     api_key=os.getenv('OPEN_AI_KEY')
@@ -25,15 +25,12 @@ def decomplicate(complex_medical_terms):
         ]
     )
 
-    # print(res)
-
     simple_medical_terms = res.choices[0].message.content
 
     # # find the fist instance of 'simplified: ' and return the rest of the string excluding 'simplified: '
     simple_medical_terms = simple_medical_terms[simple_medical_terms.find('Simplified: ') + len('Simplified: '):]
 
-    print(simple_medical_terms)
-
+    # print(simple_medical_terms)
     if simple_medical_terms == '':
         return (None, 'Unable to retrieve medical terms from server')
 
