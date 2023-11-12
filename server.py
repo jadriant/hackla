@@ -13,11 +13,14 @@ from handlers.text_to_speech import text_to_speech
 
 from pydub import AudioSegment
 
-def convert_webm_to_wav(webm_file):
-    audio = AudioSegment.from_file(webm_file, format="webm")
-    wav_file = webm_file.split('.')[0] + '.wav'
-    audio.export(wav_file, format="wav")
-    return wav_file
+def convert_webm_to_wav(webm_file_storage):
+    filename = webm_file_storage.filename
+    base_name = filename.split('.')[0]
+    wav_file_path = base_name + '.wav'  # Specify the directory to save
+    
+    audio = AudioSegment.from_file(webm_file_storage, format="webm")
+    audio.export(wav_file_path, format="wav")
+    return wav_file_path
 
 app = Flask(__name__)
 load_dotenv()
@@ -29,7 +32,9 @@ def process_doc():
     is converted from English to a foreign language.
     """
 
-    file = request.files['file']
+    file = req.files['file']
+
+    input_lang_choice, output_lang_choice = '英语', '韩语'
 
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
@@ -37,14 +42,13 @@ def process_doc():
         print("received file")
         print(file.filename)
 
-    if file and allowed_file(file.filename):
+    if file:
         wav_file = convert_webm_to_wav(file)
-        input_speech = wave.open(wav_file, 'rb')
     else:
         print("Error")
         return jsonify({'error': 'Error processing file'}), 400
 
-    complex_medical_terms, err = speech_to_text(input_speech)
+    complex_medical_terms, err = speech_to_text(wav_file)
 
     if err != None:
         return jsonify({
@@ -59,7 +63,7 @@ def process_doc():
             'error': err
         })
 
-    output_lang, err = translate(simple_medical_terms)
+    output_lang, err = translate(simple_medical_terms, input_lang_choice, output_lang_choice)
     if err != None:
         return jsonify({
             'error': err
@@ -74,24 +78,23 @@ def process_patient():
     is converted from a foreign language to English.
     """
     
-    file = request.files['file']
+    file = req.files['file']
 
-    if file and allowed_file(file.filename):
+    input_lang_choice, output_lang_choice = '韩文', '韩语'
+
+    if file:
         wav_file = convert_webm_to_wav(file)
-        input_speech = wave.open(wav_file, 'rb')
     else:
         print("Error")
         return jsonify({'error': 'Error processing file'}), 400
-
-    complex_medical_terms, err = speech_to_text(input_speech)
     
-    simple_question, err = speech_to_text(input_audio)
+    simple_question, err = speech_to_text(wav_file)
     if err != None:
         return jsonify({
             'error': err
         })
 
-    en_lang, err = translate(simple_question)
+    en_lang, err = translate(simple_question, input_lang_choice, output_lang_choice)
     if err != None:
         return jsonify({
             'error': err
@@ -101,4 +104,4 @@ def process_patient():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5050, debug=True)
+    app.run(host='localhost', port=5000, debug=True)
