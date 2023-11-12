@@ -14,65 +14,90 @@ function ToggleButton({ label, isRotated }) {
     const [audioBlob, setAudioBlob] = useState(null);
     const mediaRecorderRef = useRef(null); // Ref to hold the MediaRecorder instance
 
+    const [isReadyToSend, setIsReadyToSend] = useState(false); // New state to track if audio is ready to send
+
+
     // Function to toggle recording on and off
     const handleClick = async () => {
         // If currently not active, start recording
         if (!isActive) {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const recorder = new MediaRecorder(stream);
-                mediaRecorderRef.current = recorder;
+                const options = { mimeType: 'audio/wav' }; // Specify the MIME type for WAV format
+                const recorder = new MediaRecorder(stream, options);
 
+                // Check if the mimeType is set correctly, otherwise fallback to default
+                if (recorder.mimeType !== 'audio/wav') {
+                    console.warn("WAV format not supported, using default format");
+                }
+
+                // When recording stops, save the blob and play the audio
+                recorder.onstop = async () => {
+                    // This should be async to wait for the audio to be fetched and played
+                    setIsActive(false); // Set isActive to false to indicate recording has stopped
+                    setIsReadyToSend(true); // Send the audio to the server
+                };
+
+                // When data is available, save it to state
                 recorder.ondataavailable = (event) => {
                     setAudioBlob(event.data);
                 };
 
                 recorder.start();
                 setIsActive(true); // Set isActive to true to indicate recording has started
+
             } catch (error) {
                 console.error('Error starting recording:', error);
             }
         } else {
             // If currently active, stop recording
             if (mediaRecorderRef.current) {
-                mediaRecorderRef.current.stop();
-                setIsActive(false); // Set isActive to false to indicate recording has stopped
-                // After stopping, send the audio to the server
-                sendAudioToServer();
+                mediaRecorderRef.current.stop(); // This triggers the onstop event
+                // No need to set isActive here as it is already being set in onstop
             }
         }
     };
 
-    // Function to send the audio file to the server
     const sendAudioToServer = async () => {
         if (audioBlob) {
-            // Convert the Blob to a base64 string
-            const reader = new FileReader();
-            reader.readAsDataURL(audioBlob);
-            reader.onloadend = async () => {
-                const base64AudioMessage = reader.result.split(',')[1]; // Split to remove the data URL header
+            try {
+                // Create a FormData object
+                const formData = new FormData();
+                // Append the audio blob as a file in the FormData
+                formData.append("file", audioBlob, "recording.wav");
 
-                try {
-                    // Send the base64 audio string to the server with the correct key
-                    const response = await fetch('/doctor-speaks', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ input_audio: base64AudioMessage }),
-                    });
-                    if (response.ok) {
-                        console.log('Audio sent successfully');
-                        // Handle successful response
-                    } else {
-                        console.error('Server error:', response);
-                        // Handle server errors here
-                    }
-                } catch (error) {
-                    console.error('Error sending audio:', error);
-                    // Handle network errors here
+                // Send the FormData with the audio file to the server
+                const response = await fetch('/doctor-speaks', {
+                    method: 'POST',
+                    body: formData, // Send the FormData
+                });
+
+                if (response.ok) {
+                    console.log('Audio sent successfully');
+                    // Handle successful response
+                } else {
+                    console.error('Server error:', response);
+                    // Handle server errors here
                 }
-            };
+            } catch (error) {
+                console.error('Error sending audio:', error);
+                // Handle network errors here
+            }
+
+            // Reset states after sending the audio
+            setAudioBlob(null);
+            setIsReadyToSend(false); // Reset isReadyToSend to hide the button
+            playAudio(); // Play the recorded audio
+        }
+    };
+
+    const playAudio = () => {
+        if (audioBlob) {
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            audio.play();
+            console.log('Playing the recorded audio...');
+            setAudioBlob(null);
         }
     };
 
@@ -84,18 +109,25 @@ function ToggleButton({ label, isRotated }) {
                 {isActive ? <BsRecordCircleFill className="text-red-500" /> : <FaMicrophone className="text-green-500" />}
                 <span className="ml-2">{label}</span>
             </button>
+
+            <button
+                onClick={sendAudioToServer}
+                className="mt-4 w-48 h-10 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600"
+            >
+                Send to Server
+            </button>
+
+
         </div>
     );
 }
 
 export default function App({ user, language }) {
 
-
-
     console.log(language)
 
     return (
-        <div className="flex flex-col items-center justify-center bg-cover bg-center h-screen space-y-80" style={{ backgroundImage: "url('https://cdn.builder.io/api/v1/image/assets/TEMP/7966c460-a2cd-49b6-8e55-8965ae56e831?apiKey=be43af7b4ce2472eaff8e8a17c078188&')" }}>
+        <div className="flex flex-col items-center justify-center bg-cover bg-center h-screen space-y-60" style={{ backgroundImage: "url('https://cdn.builder.io/api/v1/image/assets/TEMP/7966c460-a2cd-49b6-8e55-8965ae56e831?apiKey=be43af7b4ce2472eaff8e8a17c078188&')" }}>
             <ToggleButton label="Patient" isRotated={true} />
             <ToggleButton label="Doctor" />
             {/* <Link id="signout" className="FormButton" to="/"
