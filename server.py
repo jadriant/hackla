@@ -24,8 +24,8 @@ def convert_webm_to_wav(webm_file_storage):
     return wav_file_path
 
 app = Flask(__name__)
-# app.config['PROPAGATE_EXCEPTIONS'] = False
-CORS(app, origins=['https://hackla-one.vercel.app'])
+app.config['CORS_HEADERS'] = 'Content-Type'
+CORS(app)
 load_dotenv()
 
 @app.route('/doctor-speaks', methods=['POST'])
