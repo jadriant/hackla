@@ -5,6 +5,7 @@ from flask import (
 )
 from dotenv import load_dotenv
 import wave
+from flask_cors import CORS
 
 from handlers.speech_to_text import speech_to_text
 from handlers.med_processor import decomplicate
@@ -23,6 +24,8 @@ def convert_webm_to_wav(webm_file_storage):
     return wav_file_path
 
 app = Flask(__name__)
+
+CORS(app)
 load_dotenv()
 
 @app.route('/doctor-speaks', methods=['POST'])
