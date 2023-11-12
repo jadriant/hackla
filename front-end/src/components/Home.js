@@ -54,7 +54,7 @@ function ToggleButton({ label, isRotated, isPatient }) {
                 formData.append("file", audioBlob, "recording.webm");
 
                 if (isPatient) {
-                    const response = await fetch('/patient-speaks', {
+                    const response = await fetch('https://medgt-backend.onrender.com/patient-speaks', {
                         method: 'POST',
                         body: formData,
                     });
@@ -67,7 +67,7 @@ function ToggleButton({ label, isRotated, isPatient }) {
                     }
                 }
                 else {
-                    const response = await fetch('/doctor-speaks', {
+                    const response = await fetch('https://medgt-backend.onrender.com/doctor-speaks', {
                         method: 'POST',
                         body: formData,
                     });
