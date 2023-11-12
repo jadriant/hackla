@@ -17,8 +17,13 @@ load_dotenv()
 def index():
     return 'Hello World!'
 
-@app.route('/process', methods=['POST'])
+@app.route('/doctor-speaks', methods=['POST'])
 def process():
+    """
+    This function needs decomplication for medical jargon, and
+    is converted from English to a foreign language.
+    """
+    
     input_audio = req.json.get('input_audio', '')
     if input_audio == '':
         return jsonify({
@@ -51,6 +56,41 @@ def process():
     
     return jsonify({
         'translated_med_simple': translated_med_simple
+    })
+
+@app.route('/patient-speaks', methods=['POST'])
+def process():
+    """
+    This function does not need decomplication for medical jargon, and
+    is converted from a foreign language to English.
+    """
+    
+    input_audio = req.json.get('input_audio', '')
+    if input_audio == '':
+        return jsonify({
+            'error': 'Unable to obtain input audio'
+        }), 404
+    
+    simple_question, err = speech_to_text(input_audio)
+    if err != None:
+        return jsonify({
+            'error': err
+        })
+
+    en_lang, err = translate(simple_question)
+    if err != None:
+        return jsonify({
+            'error': err
+        })
+    
+    en_question, err = text_to_speech(en_lang)
+    if err != None:
+        return jsonify({
+            'error': err
+        })
+    
+    return jsonify({
+        'en_question': en_question
     })
 
 
