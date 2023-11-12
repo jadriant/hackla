@@ -10,12 +10,12 @@ import "firebase/compat/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: process.env.FIREBASE_API_KEY,
-    authDomain: process.env.AUTH_DOMAIN,
-    projectId: process.env.PROJECT_ID,
-    storageBucket: process.env.STORAGE_BUCKET,
-    messagingSenderId: process.env.SENDER_ID,
-    appId: process.env.APP_ID
+    apiKey: "AIzaSyBNJCuV0TxS5bfqt_vErIFqjRN66y6Rqz4",
+    authDomain: "medtranslate-1b404.firebaseapp.com",
+    projectId: "medtranslate-1b404",
+    storageBucket: "medtranslate-1b404.appspot.com",
+    messagingSenderId: "38940060337",
+    appId: "1:38940060337:web:f1e0a25a45abe6ad535090"
 };
 
 // Initialize Firebase
