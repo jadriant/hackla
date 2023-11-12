@@ -1,22 +1,24 @@
 import os
-import requests
+from gradio_client import Client
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def speech_to_text(input_speech):
     speech_to_text_endpoint = os.environ.get('SPEECH_TO_TEXT_ENDPOINT')
     if speech_to_text_endpoint == None:
         return (None, 'Unable to reach speech to text server')
+    client = Client(speech_to_text_endpoint)
     
-    speech_to_text_endpoint_path = speech_to_text_endpoint + '/speech-to-text'
-    payload = {
-        'input_audio': input_speech
-    }
-
-    res = requests.get(speech_to_text_endpoint_path, json=payload)
-    if res.status_code != 200:
-        return (None, 'Unable to process speech to text')
-    
-    complex_medical_terms = res.json().get('med_complex', '')
+    complex_medical_terms = client.predict(
+        input_speech,
+        'transcribe',
+        api_name='/predict'
+    )
     if complex_medical_terms == '':
         return (None, 'Unable to retrieve medical terms from server')
     
     return (complex_medical_terms, None)
+
+print(speech_to_text('./test/test.wav'))
