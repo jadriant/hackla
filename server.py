@@ -18,7 +18,7 @@ def index():
     return 'Hello World!'
 
 @app.route('/doctor-speaks', methods=['POST'])
-def process():
+def process_doc():
     """
     This function needs decomplication for medical jargon, and
     is converted from English to a foreign language.
@@ -59,7 +59,7 @@ def process():
     })
 
 @app.route('/patient-speaks', methods=['POST'])
-def process():
+def process_patient():
     """
     This function does not need decomplication for medical jargon, and
     is converted from a foreign language to English.
