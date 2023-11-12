@@ -52,7 +52,7 @@ function ToggleButton({ label, isRotated, isPatient }) {
             try {
                 const formData = new FormData();
                 formData.append("file", audioBlob, "recording.webm");
-                
+
                 if (isPatient) {
                     const response = await fetch('/patient-speaks', {
                         method: 'POST',
@@ -60,7 +60,7 @@ function ToggleButton({ label, isRotated, isPatient }) {
                     });
                     if (response.ok) {
                         const responseBlob = await response.blob();
-                        playReceivedAudio(responseBlob);    
+                        playReceivedAudio(responseBlob);
                         console.log('Audio received successfully');
                     } else {
                         console.error('Server error:', response);
@@ -73,15 +73,15 @@ function ToggleButton({ label, isRotated, isPatient }) {
                     });
                     if (response.ok) {
                         const responseBlob = await response.blob();
-                        playReceivedAudio(responseBlob);    
+                        playReceivedAudio(responseBlob);
                         console.log('Audio received successfully');
                     } else {
                         console.error('Server error:', response);
                     }
                 }
-        } catch (error) {
-            console.error('Error in conversion or sending:', error);
-        }
+            } catch (error) {
+                console.error('Error in conversion or sending:', error);
+            }
 
             setAudioBlob(null);
             setIsReadyToSend(false);
@@ -122,7 +122,7 @@ function ToggleButton({ label, isRotated, isPatient }) {
                 onClick={sendAudioToServer}
                 className="mt-4 w-48 h-10 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600"
             >
-                Send to Server
+                Translate
             </button>
 
 
@@ -136,8 +136,8 @@ export default function App({ user, language }) {
 
     return (
         <div className="flex flex-col items-center justify-center bg-cover bg-center h-screen space-y-60" style={{ backgroundImage: "url('https://cdn.builder.io/api/v1/image/assets/TEMP/7966c460-a2cd-49b6-8e55-8965ae56e831?apiKey=be43af7b4ce2472eaff8e8a17c078188&')" }}>
-            <ToggleButton label="Patient" isRotated={true} isPatient={true}/>
-            <ToggleButton label="Doctor" isPatient={false}/>
+            <ToggleButton label="Patient" isRotated={true} isPatient={true} />
+            <ToggleButton label="Doctor" isPatient={false} />
             {/* <Link id="signout" className="FormButton" to="/"
                 onClick={() => auth.signOut()}>{language}
             </Link> */}
