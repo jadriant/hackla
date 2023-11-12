@@ -7,6 +7,8 @@ import ReactDOM from 'react-dom';
 import { FaMicrophone } from 'react-icons/fa';
 import '../styles/Home.css';
 import { BsRecordCircleFill } from 'react-icons/bs'; // Assuming this is the red icon
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+
 
 
 function ToggleButton({ label, isRotated }) {
@@ -23,73 +25,69 @@ function ToggleButton({ label, isRotated }) {
         if (!isActive) {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const options = { mimeType: 'audio/wav' }; // Specify the MIME type for WAV format
-                const recorder = new MediaRecorder(stream, options);
+                const options = { mimeType: 'audio/webm' }; // Use webm format for wider compatibility
+                mediaRecorderRef.current = new MediaRecorder(stream, options);
 
-                // Check if the mimeType is set correctly, otherwise fallback to default
-                if (recorder.mimeType !== 'audio/wav') {
-                    console.warn("WAV format not supported, using default format");
-                }
-
-                // When recording stops, save the blob and play the audio
-                recorder.onstop = async () => {
-                    // This should be async to wait for the audio to be fetched and played
-                    setIsActive(false); // Set isActive to false to indicate recording has stopped
-                    setIsReadyToSend(true); // Send the audio to the server
+                // When recording stops, save the blob and prepare to send
+                mediaRecorderRef.current.onstop = async () => {
+                    setIsActive(false); // Set isActive to false
+                    setIsReadyToSend(true); // Ready to convert and send
                 };
 
                 // When data is available, save it to state
-                recorder.ondataavailable = (event) => {
+                mediaRecorderRef.current.ondataavailable = (event) => {
                     setAudioBlob(event.data);
                 };
 
-                recorder.start();
-                setIsActive(true); // Set isActive to true to indicate recording has started
+
+                mediaRecorderRef.current.start();
+                setIsActive(true); // Set isActive to true
 
             } catch (error) {
                 console.error('Error starting recording:', error);
             }
         } else {
             // If currently active, stop recording
-            if (mediaRecorderRef.current) {
-                mediaRecorderRef.current.stop(); // This triggers the onstop event
-                // No need to set isActive here as it is already being set in onstop
-            }
+            mediaRecorderRef.current.stop();
         }
     };
 
-    const sendAudioToServer = async () => {
-        if (audioBlob) {
-            try {
-                // Create a FormData object
-                const formData = new FormData();
-                // Append the audio blob as a file in the FormData
-                formData.append("file", audioBlob, "recording.wav");
+    const convertAndSendAudio = async (audioBlob) => {
+        try {
+            // Convert audioBlob from webm to wav using ffmpeg.js
+            const wavBlob = await convertWebmToWav(audioBlob);
 
-                // Send the FormData with the audio file to the server
-                const response = await fetch('/doctor-speaks', {
-                    method: 'POST',
-                    body: formData, // Send the FormData
-                });
+            // Create FormData with the converted wavBlob
+            const formData = new FormData();
+            formData.append("file", wavBlob, "recording.wav");
 
-                if (response.ok) {
-                    console.log('Audio sent successfully');
-                    // Handle successful response
-                } else {
-                    console.error('Server error:', response);
-                    // Handle server errors here
-                }
-            } catch (error) {
-                console.error('Error sending audio:', error);
-                // Handle network errors here
+            // Send the FormData to the server
+            const response = await fetch('/doctor-speaks', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                console.log('Audio sent successfully');
+            } else {
+                console.error('Server error:', response);
             }
-
-            // Reset states after sending the audio
-            setAudioBlob(null);
-            setIsReadyToSend(false); // Reset isReadyToSend to hide the button
-            playAudio(); // Play the recorded audio
+        } catch (error) {
+            console.error('Error in conversion or sending:', error);
         }
+
+        // Reset states after sending
+        setAudioBlob(null);
+        setIsReadyToSend(false);
+        playAudio() // Play the audio after sending
     };
+
+
+    async function convertWebmToWav(audioBlob) {
+    }
+
+
+
 
     const playAudio = () => {
         if (audioBlob) {
@@ -111,7 +109,7 @@ function ToggleButton({ label, isRotated }) {
             </button>
 
             <button
-                onClick={sendAudioToServer}
+                onClick={convertAndSendAudio}
                 className="mt-4 w-48 h-10 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600"
             >
                 Send to Server
