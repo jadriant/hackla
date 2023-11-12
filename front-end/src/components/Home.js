@@ -149,10 +149,3 @@ export default function App({ user, language }) {
 // backgroundImage: "url('https://cdn.builder.io/api/v1/image/assets/TEMP/7966c460-a2cd-49b6-8e55-8965ae56e831?apiKey=be43af7b4ce2472eaff8e8a17c078188&')"
 
 
-
-{/* 
-
-
-
-
-*/}
