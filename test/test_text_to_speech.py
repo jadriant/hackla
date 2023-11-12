@@ -4,6 +4,9 @@ from io import BytesIO
 from pydub import AudioSegment
 
 def play_stream(url):
+    """
+    This one is harder to test. Goodluck 😈
+    """
     response = requests.get(url, stream=True)
     buffer = BytesIO()
 

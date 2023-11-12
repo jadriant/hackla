@@ -22,7 +22,7 @@ def translate(simple_medical_terms, input_lang_choice, output_lang_choice):
     if res.status_code != 200:
         return (None, 'Unable to translate medical terms')
     
-    output_lang = res.json().get('data', '')
+    output_lang = res.json().get('data', '')[0]
     if output_lang == '':
         return (None, 'Unable to retrieve translation from server')
     

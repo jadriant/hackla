@@ -16,6 +16,19 @@ python server.py
 
 Some informal tests have been setup but without the usual rigour of unit tests, and they can be found under `/test`.
 
+## Testing
+
+```
+cd ./test
+python test_speech_to_text.py
+python test_translator.py
+```
+
+- `TODO:` test_text_to_speech.py
+- `TODO:` test_med_processor.py
+
+When calling APIs to Huggingface Spaces, it might take awhile for the containers to spin up (because they become inactive after 1h), so please retry the testing after ~2min has passed.
+
 ## Authors
 
 This project was part of our ongoing paper to enhance doctor-patient communication, especially in third world countries. The authors involved in training our own models and building this end-to-end application are:
