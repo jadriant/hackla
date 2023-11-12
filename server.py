@@ -19,17 +19,32 @@ def process_doc():
     This function needs decomplication for medical jargon, and
     is converted from English to a foreign language.
     """
-    
-    input_audio = req.json.get('input_audio', '')
 
-    if input_audio == '':
-        return jsonify({
-            'error': 'Unable to obtain input audio'
-        }), 404
+    file = request.files['file']
+
+
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
     else:
-        print("received input audio")
+        print("received file")
+        print(file.filename)
 
-    complex_medical_terms, err = speech_to_text(input_audio)
+    if file and allowed_file(file.filename):
+        try:
+            # Process the .wav file
+            with wave.open(file, 'rb') as wav_file:
+                # Extract Raw Audio from Wav File
+                signal = wav_file.readframes(-1)
+                signal = np.frombuffer(signal, dtype='int16')
+                fs = wav_file.getframerate()
+                if wav_file.getnchannels() == 2:
+                    print('Just mono files')
+                    sys.exit(0)
+    except:
+        print("Error")
+        return jsonify({'error': 'Error processing file'}), 400
+
+    complex_medical_terms, err = speech_to_text(file)
 
     if err != None:
         return jsonify({
@@ -67,11 +82,31 @@ def process_patient():
     is converted from a foreign language to English.
     """
     
-    input_audio = req.json.get('input_audio', '')
-    if input_audio == '':
-        return jsonify({
-            'error': 'Unable to obtain input audio'
-        }), 404
+    file = request.files['file']
+
+
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    else:
+        print("received file")
+        print(file.filename)
+
+    if file and allowed_file(file.filename):
+        try:
+            # Process the .wav file
+            with wave.open(file, 'rb') as wav_file:
+                # Extract Raw Audio from Wav File
+                signal = wav_file.readframes(-1)
+                signal = np.frombuffer(signal, dtype='int16')
+                fs = wav_file.getframerate()
+                if wav_file.getnchannels() == 2:
+                    print('Just mono files')
+                    sys.exit(0)
+    except:
+        print("Error")
+        return jsonify({'error': 'Error processing file'}), 400
+
+    complex_medical_terms, err = speech_to_text(file)
     
     simple_question, err = speech_to_text(input_audio)
     if err != None:
