@@ -18,7 +18,7 @@ def index():
     return 'Hello World!'
 
 @app.route('/process', methods=['POST'])
-def simplify():
+def process():
     input_audio = req.json.get('input_audio', '')
     if input_audio == '':
         return jsonify({
