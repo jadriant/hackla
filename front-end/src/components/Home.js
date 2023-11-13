@@ -9,41 +9,31 @@ import '../styles/Home.css';
 import { BsRecordCircleFill } from 'react-icons/bs'; // Assuming this is the red icon
 
 
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile } from '@ffmpeg/util';
-
+import MicRecorder from 'mic-recorder-to-mp3';
 
 function ToggleButton({ label, isRotated, isPatient }) {
     const [isActive, setIsActive] = useState(false);
     const [audioBlob, setAudioBlob] = useState(null);
-    const mediaRecorderRef = useRef(null);
     const [isReadyToSend, setIsReadyToSend] = useState(false);
+    const recorder = useRef(new MicRecorder({ bitRate: 128 }));
 
-    // Function to toggle recording on and off
     const handleClick = async () => {
         if (!isActive) {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const options = { mimeType: 'audio/webm' };
-                mediaRecorderRef.current = new MediaRecorder(stream, options);
-
-                mediaRecorderRef.current.onstop = async () => {
-                    setIsActive(false);
-                    setIsReadyToSend(true); // Ready to send
-                };
-
-                mediaRecorderRef.current.ondataavailable = (event) => {
-                    setAudioBlob(event.data);
-                };
-
-                mediaRecorderRef.current.start();
+                await recorder.current.start();
                 setIsActive(true);
-
             } catch (error) {
                 console.error('Error starting recording:', error);
             }
         } else {
-            mediaRecorderRef.current.stop();
+            recorder.current.stop().getMp3().then(([buffer, blob]) => {
+                const audioURL = URL.createObjectURL(new Blob([blob], { type: 'audio/mp3' }));
+                setAudioBlob(new Blob([blob], { type: 'audio/mp3' }));
+                setIsActive(false);
+                setIsReadyToSend(true);
+            }).catch((e) => {
+                console.error('Error stopping recording:', e);
+            });
         }
     };
 
@@ -51,36 +41,26 @@ function ToggleButton({ label, isRotated, isPatient }) {
         if (audioBlob && isReadyToSend) {
             try {
                 const formData = new FormData();
-                formData.append("file", audioBlob, "recording.webm");
+                formData.append("file", audioBlob, "recording.mp3");
 
-                if (isPatient) {
-                    const response = await fetch('https://medgt-backend.onrender.com/patient-speaks', {
-                        method: 'POST',
-                        body: formData,
-                    });
-                    if (response.ok) {
-                        const responseBlob = await response.blob();
-                        playReceivedAudio(responseBlob);
-                        console.log('Audio received successfully');
-                    } else {
-                        console.error('Server error:', response);
-                    }
-                }
-                else {
-                    const response = await fetch('https://medgt-backend.onrender.com/doctor-speaks', {
-                        method: 'POST',
-                        body: formData,
-                    });
-                    if (response.ok) {
-                        const responseBlob = await response.blob();
-                        playReceivedAudio(responseBlob);
-                        console.log('Audio received successfully');
-                    } else {
-                        console.error('Server error:', response);
-                    }
+                const endpoint = isPatient
+                    ? 'https://medgt-backend.onrender.com/patient-speaks'
+                    : 'https://medgt-backend.onrender.com/doctor-speaks';
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const responseBlob = await response.blob();
+                    playReceivedAudio(responseBlob);
+                    console.log('Audio received successfully');
+                } else {
+                    console.error('Server error:', response);
                 }
             } catch (error) {
-                console.error('Error in conversion or sending:', error);
+                console.error('Error in sending:', error);
             }
 
             setAudioBlob(null);
@@ -95,17 +75,15 @@ function ToggleButton({ label, isRotated, isPatient }) {
         console.log('Playing the received audio...');
     };
 
-
-    async function convertWebmToWav(audioBlob) {
-    }
-
-    const playAudio = () => {
+    // Function to test playback of the recorded audio
+    const testPlayback = () => {
         if (audioBlob) {
             const audioUrl = URL.createObjectURL(audioBlob);
             const audio = new Audio(audioUrl);
             audio.play();
-            console.log('Playing the recorded audio...');
-            setAudioBlob(null);
+            console.log('Testing the recorded audio playback...');
+        } else {
+            console.log('No recorded audio to test.');
         }
     };
 
@@ -125,7 +103,12 @@ function ToggleButton({ label, isRotated, isPatient }) {
                 Translate
             </button>
 
-
+            <button
+                onClick={testPlayback}
+                className="mt-4 w-48 h-10 bg-yellow-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-600"
+            >
+                Test Playback
+            </button>
         </div>
     );
 }

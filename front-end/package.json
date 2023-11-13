@@ -12,6 +12,7 @@
     "autoprefixer": "^10.4.16",
     "firebase": "^9.19.1",
     "firebase-tools": "^11.27.0",
+    "mic-recorder-to-mp3": "^2.2.2",
     "postcss": "^8.4.31",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
