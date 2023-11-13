@@ -20,7 +20,9 @@ function App() {
     return (
         <div className="App">
             <Routes>
-                <Route path="/" element={user ? <Home user={user} language={language} /> : <Login setLanguage={setLanguage} />} />
+                {/* <Route path="/" element={user ? <Home user={user} language={language} /> : <Login setLanguage={setLanguage} />} /> */}
+
+                <Route path="/" element={<Home />} />
                 <Route path="/Load" element={<Load user={user} />} />
             </Routes>
         </div>
