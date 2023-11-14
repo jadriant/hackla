@@ -17,5 +17,5 @@ def text_to_speech(output_lang):
     Look for keyword `files` here. Afterward you may need to serialize the file before
     sending it over to the client.
     """
-    output_speech = generate(text=output_lang, stream=True)
+    output_speech = generate(text=output_lang, model="eleven_multilingual_v2", stream=True)
     return Response(output_speech, content_type='application/octet-stream')
