@@ -39,4 +39,5 @@ This project was part of our ongoing paper to enhance doctor-patient communicati
 - Alfred Tan
 - Wilson Tan
 
-Feel free to learn more about our project in the [paper linked above](./paper.pdf).
+Feel free to learn more about our project in the [paper linked above](./final_report.pdf).
+
